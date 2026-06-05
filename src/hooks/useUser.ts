@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react'
 import type { User } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/client'
-import { isSupabaseConfigured } from '@/lib/config'
 import type { UserProfile } from '@/types/shop.types'
 
 interface UseUserResult {
@@ -24,7 +23,9 @@ export function useUser(): UseUserResult {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (!isSupabaseConfigured()) {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    if (!url || !key) {
       setLoading(false)
       return
     }
