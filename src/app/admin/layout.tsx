@@ -1,4 +1,6 @@
 import type { Metadata } from 'next'
+import { redirect } from 'next/navigation'
+import { getAdminUser } from '@/lib/auth'
 import { AdminSidebar } from '@/components/layout/AdminSidebar'
 
 export const metadata: Metadata = {
@@ -6,11 +8,14 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 }
 
-export default function AdminLayout({
+export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode
-}): React.ReactElement {
+}): Promise<React.ReactElement> {
+  const admin = await getAdminUser()
+  if (!admin) redirect('/')
+
   return (
     <div className="flex min-h-screen flex-col md:flex-row">
       <AdminSidebar />

@@ -1,6 +1,7 @@
 import * as Sentry from '@sentry/nextjs'
 import type { User } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { isSupabaseConfigured } from '@/lib/config'
 import type { UserRole } from '@/types/shop.types'
 
@@ -19,12 +20,12 @@ export async function getSessionUser(): Promise<User | null> {
   }
 }
 
-/** Reads a user's role from the profiles table (RLS: users read their own row). */
+/** Reads a user's role using the service-role client (bypasses RLS). */
 export async function getUserRole(userId: string): Promise<UserRole | null> {
   if (!isSupabaseConfigured()) return null
   try {
-    const supabase = createClient()
-    const { data, error } = await supabase
+    const admin = createAdminClient()
+    const { data, error } = await admin
       .from('users')
       .select('role')
       .eq('id', userId)

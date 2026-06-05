@@ -47,18 +47,6 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
     return NextResponse.redirect(redirectUrl)
   }
 
-  // Enforce the admin role for /admin routes.
-  if (isAdmin && user) {
-    const { data: profile, error: roleError } = await supabase
-      .from('users')
-      .select('role')
-      .eq('id', user.id)
-      .maybeSingle()
-    if (roleError || profile?.role !== 'admin') {
-      return NextResponse.redirect(new URL('/', request.url))
-    }
-  }
-
   // Keep logged-in users away from auth pages.
   if (isAuthRoute && user) {
     return NextResponse.redirect(new URL('/', request.url))
