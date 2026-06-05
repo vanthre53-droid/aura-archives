@@ -49,12 +49,12 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
 
   // Enforce the admin role for /admin routes.
   if (isAdmin && user) {
-    const { data: profile } = await supabase
+    const { data: profile, error: roleError } = await supabase
       .from('users')
       .select('role')
       .eq('id', user.id)
-      .single()
-    if (profile?.role !== 'admin') {
+      .maybeSingle()
+    if (roleError || profile?.role !== 'admin') {
       return NextResponse.redirect(new URL('/', request.url))
     }
   }
