@@ -3,10 +3,12 @@
 import * as React from 'react'
 import Link from 'next/link'
 import * as Dialog from '@radix-ui/react-dialog'
-import { Menu, Search, ShoppingBag, X } from 'lucide-react'
+import { Menu, Search, ShoppingBag, Shield, User, LogOut, X } from 'lucide-react'
 import { APP_NAME } from '@/lib/constants'
 import { useUiStore } from '@/store/ui.store'
 import { useCartStore, selectCartCount } from '@/store/cart.store'
+import { useUser } from '@/hooks/useUser'
+import { useAuth } from '@/hooks/useAuth'
 
 const NAV_LINKS = [
   { href: '/collections/jewelry', label: 'Jewelry' },
@@ -20,6 +22,8 @@ export function Navbar(): React.ReactElement {
   const openCart = useUiStore((s) => s.setCartDrawerOpen)
   const hasHydrated = useCartStore((s) => s.hasHydrated)
   const cartCount = useCartStore(selectCartCount)
+  const { user, isAdmin, loading } = useUser()
+  const { signOut } = useAuth()
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur">
@@ -53,6 +57,15 @@ export function Navbar(): React.ReactElement {
                     {link.label}
                   </Link>
                 ))}
+                {!loading && isAdmin ? (
+                  <Link
+                    href="/admin"
+                    onClick={() => setMenuOpen(false)}
+                    className="text-sm uppercase tracking-widest text-gold hover:text-text-muted"
+                  >
+                    Admin Panel
+                  </Link>
+                ) : null}
               </nav>
             </Dialog.Content>
           </Dialog.Portal>
@@ -79,6 +92,11 @@ export function Navbar(): React.ReactElement {
         </Link>
 
         <div className="flex items-center gap-4">
+          {!loading && isAdmin ? (
+            <Link href="/admin" aria-label="Admin panel" className="hover:text-text-muted">
+              <Shield className="h-5 w-5" aria-hidden />
+            </Link>
+          ) : null}
           <Link href="/search" aria-label="Search" className="hover:text-text-muted">
             <Search className="h-5 w-5" aria-hidden />
           </Link>
@@ -95,6 +113,22 @@ export function Navbar(): React.ReactElement {
               </span>
             ) : null}
           </button>
+          {!loading ? (
+            user ? (
+              <button
+                type="button"
+                aria-label="Sign out"
+                onClick={() => void signOut()}
+                className="hover:text-text-muted"
+              >
+                <LogOut className="h-5 w-5" aria-hidden />
+              </button>
+            ) : (
+              <Link href="/login" aria-label="Sign in" className="hover:text-text-muted">
+                <User className="h-5 w-5" aria-hidden />
+              </Link>
+            )
+          ) : null}
         </div>
       </div>
     </header>
