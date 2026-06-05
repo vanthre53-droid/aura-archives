@@ -17,9 +17,12 @@ export const rateLimited = (): NextResponse => fail('Too many requests. Please s
 export const serverError = (): NextResponse =>
   fail('Something went wrong. Please try again.', 500)
 
+const IP_PATTERN = /^[\d.]+$|^[\da-f:]+$/i
+
 /** Best-effort client IP for rate-limit keys and audit logs. */
 export function getClientIp(request: NextRequest): string {
   const forwarded = request.headers.get('x-forwarded-for')
-  if (forwarded) return forwarded.split(',')[0]!.trim()
-  return request.headers.get('x-real-ip') ?? '127.0.0.1'
+  const raw = forwarded ? forwarded.split(',')[0]!.trim() : request.headers.get('x-real-ip')
+  if (raw && IP_PATTERN.test(raw)) return raw
+  return '127.0.0.1'
 }

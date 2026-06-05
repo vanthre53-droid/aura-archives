@@ -21,7 +21,9 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       if (safeNext !== '/reset-password') {
         const { data } = await supabase.auth.getUser()
         const user = data.user
-        if (user?.email) {
+        // Only send welcome email on first confirmation, not on every callback.
+        const isNewUser = user?.created_at && (Date.now() - new Date(user.created_at).getTime() < 60_000)
+        if (user?.email && isNewUser) {
           const name =
             (typeof user.user_metadata?.full_name === 'string' && user.user_metadata.full_name) ||
             user.email.split('@')[0]!

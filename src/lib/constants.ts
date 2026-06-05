@@ -3,7 +3,10 @@ export const APP_NAME = 'Aura Archives'
 export const APP_VERSION = '1.0.0'
 
 export const APP_URL =
-  process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
+  process.env.NEXT_PUBLIC_APP_URL ??
+  (process.env.NEXT_PUBLIC_VERCEL_URL
+    ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
+    : 'http://localhost:3000')
 
 export const SUPPORT_EMAIL = 'support@auraarchives.com'
 export const PRIVACY_EMAIL = 'privacy@auraarchives.com'

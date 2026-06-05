@@ -125,11 +125,12 @@ export async function searchProducts(query: string, limit = 24): Promise<Product
   }
   try {
     const supabase = createClient()
+    const safeTerm = term.replace(/[%_\\]/g, '\\$&')
     const { data, error } = await supabase
       .from('products')
       .select('*')
       .eq('is_active', true)
-      .or(`name.ilike.%${term}%,description.ilike.%${term}%`)
+      .or(`name.ilike.%${safeTerm}%,description.ilike.%${safeTerm}%`)
       .limit(limit)
     if (error) throw error
     return data ?? []
