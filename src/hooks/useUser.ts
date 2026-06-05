@@ -15,8 +15,8 @@ interface UseUserResult {
 
 /**
  * Reads the current auth user + their public.users profile, and keeps it in
- * sync with auth state changes. Returns immediately (no user) when Supabase
- * is not configured.
+ * sync with auth state changes. Fetches the role via an API call to avoid
+ * RLS issues on the client.
  */
 export function useUser(): UseUserResult {
   const [user, setUser] = useState<User | null>(null)
@@ -37,8 +37,15 @@ export function useUser(): UseUserResult {
         if (active) setProfile(null)
         return
       }
-      const { data } = await supabase.from('users').select('*').eq('id', nextUser.id).single()
-      if (active) setProfile(data)
+      try {
+        const res = await fetch('/api/v1/me')
+        if (res.ok) {
+          const json = await res.json() as { success: boolean; data: UserProfile | null }
+          if (active && json.data) setProfile(json.data)
+        }
+      } catch {
+        // Profile fetch failed — isAdmin will be false
+      }
     }
 
     void supabase.auth.getUser().then(async ({ data }) => {
